@@ -234,7 +234,7 @@ func (db *db_state) add_stdin() {
 
 
 func main() {
-    // help v delim^field^positional=1 v remove^positional=1 v path^positional=1 v positional=1
+    // help v delim^field^positional=1 v remove^positional=1 v path v positional=1
 
     argsHelp := flag.Bool("help", false, "Print this message.")
     argsDelim := flag.String("delimiter", "", "Delimiter to split the line into parts, requires -f.")
@@ -244,7 +244,7 @@ func main() {
     argsPath := flag.Bool("path", false, "Print path to database save location.")
     argsIncrement := flag.String("inc", "", "Increment the line with the specified identifier.")
     flag.Parse()
-    if !( *argsHelp || *argsDelim!=""&&*argsField!=-1&&*argsName!="" || *argsRemove!=""&&*argsName!="" || *argsPath&&*argsName!="" || *argsName!="" ) {
+    if !( *argsHelp || *argsDelim!=""&&*argsField!=-1&&*argsName!="" || *argsRemove!=""&&*argsName!="" || *argsPath || *argsName!="" ) {
         flag.Usage()
         return
     }
@@ -257,6 +257,11 @@ func main() {
         return
     }
 
+    if *argsPath {
+        text := db_state_get_save_dir()
+        fmt.Printf("Path: %s\n",text)
+        return
+    }
     if *argsDelim!=""&&*argsField!=-1&&*argsName!="" {
         if *argsField < 0 {
             fmt.Fprintln(os.Stderr, "--field must be >= 0!")
@@ -280,12 +285,6 @@ func main() {
             db._drop_entry(idx)
             db.db_state_save()
         }
-        return
-    }
-    if *argsPath&&*argsName!="" {
-        db := db_state_load(*argsName)
-        text := db_state_get_save_path(db.Conf.Name)
-        fmt.Printf("Path: %s\n",text)
         return
     }
     if *argsName!="" {
